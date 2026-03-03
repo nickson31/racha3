@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
+import { X, Heart } from 'lucide-react'
 import { LeadCard } from '@/components/lead-card'
 import type { Lead } from '@/lib/leads-data'
 
@@ -10,10 +10,9 @@ interface SwipeStackProps {
   leads: Lead[]
   onLike: (lead: Lead) => void
   onDislike: (lead: Lead) => void
-  onBack: () => void
 }
 
-export function SwipeStack({ leads, onLike, onDislike, onBack }: SwipeStackProps) {
+export function SwipeStack({ leads, onLike, onDislike }: SwipeStackProps) {
   const [remaining, setRemaining] = useState(leads)
   const [lastAction, setLastAction] = useState<'like' | 'dislike' | null>(null)
 
@@ -21,7 +20,6 @@ export function SwipeStack({ leads, onLike, onDislike, onBack }: SwipeStackProps
     (direction: 'left' | 'right', leadId: string) => {
       const lead = remaining.find((l) => l.id === leadId)
       if (!lead) return
-
       if (direction === 'right') {
         onLike(lead)
         setLastAction('like')
@@ -29,10 +27,7 @@ export function SwipeStack({ leads, onLike, onDislike, onBack }: SwipeStackProps
         onDislike(lead)
         setLastAction('dislike')
       }
-
       setRemaining((prev) => prev.filter((l) => l.id !== leadId))
-
-      // reset last action indicator after 1s
       setTimeout(() => setLastAction(null), 800)
     },
     [remaining, onLike, onDislike]
@@ -42,77 +37,61 @@ export function SwipeStack({ leads, onLike, onDislike, onBack }: SwipeStackProps
   const previewLeads = remaining.slice(1, 3)
 
   return (
-    <div className="relative flex flex-col h-full bg-background overflow-hidden">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
-        <button
-          onClick={onBack}
-          className="flex items-center justify-center w-11 h-11 rounded-full border border-[#222] bg-[#0d0d0d] active:bg-[#1a1a1a] transition-colors"
-          aria-label="Volver al dashboard"
-        >
-          <ArrowLeft size={18} className="text-[#888]" />
-        </button>
-
-        <div className="text-center">
-          <span className="text-[10px] text-[#555] tracking-widest uppercase block">
-            Nuevos Leads
-          </span>
-          <span className="text-xs text-[#333]">
-            {remaining.length} restante{remaining.length !== 1 ? 's' : ''}
-          </span>
+    <div className="flex flex-col h-full bg-background overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-2 shrink-0">
+        <div>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
+            Smart Leads
+          </h1>
+          <p className="text-xs text-muted-foreground font-medium">
+            {remaining.length} lead{remaining.length !== 1 ? 's' : ''} pendiente{remaining.length !== 1 ? 's' : ''}
+          </p>
         </div>
 
-        {/* Action feedback badge */}
+        {/* Action feedback */}
         <AnimatePresence>
           {lastAction && (
             <motion.div
               key={lastAction}
-              initial={{ opacity: 0, scale: 0.8, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-              className="w-11 h-11 rounded-full flex items-center justify-center border"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.18 }}
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
               style={{
-                borderColor: lastAction === 'like' ? '#00ff6633' : '#ff333333',
-                background: lastAction === 'like' ? '#00ff6612' : '#ff333312',
+                background: lastAction === 'like' ? '#e8f9f1' : '#fde8ea',
               }}
             >
-              <span
-                className="text-sm font-bold"
-                style={{ color: lastAction === 'like' ? '#00ff66' : '#ff3333' }}
-              >
-                {lastAction === 'like' ? '+' : '−'}
-              </span>
+              {lastAction === 'like' ? (
+                <Heart size={18} className="fill-[var(--like-color)] text-[var(--like-color)]" />
+              ) : (
+                <X size={18} className="text-[var(--nope-color)]" strokeWidth={2.5} />
+              )}
             </motion.div>
           )}
-          {!lastAction && <div className="w-11 h-11" />}
+          {!lastAction && <div className="w-10 h-10" />}
         </AnimatePresence>
       </div>
 
-      {/* Card stack area */}
-      <div className="flex-1 relative mx-4 mb-24">
+      {/* Card stack */}
+      <div className="flex-1 relative mx-4 mt-2 mb-3">
         {remaining.length === 0 ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="absolute inset-0 flex flex-col items-center justify-center gap-4"
           >
-            <div className="w-12 h-12 rounded-full border border-[#222] flex items-center justify-center">
-              <span className="text-[#555] text-xl">∅</span>
+            <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center">
+              <Flame size={32} className="text-muted-foreground" />
             </div>
-            <p className="text-[#555] text-sm tracking-widest uppercase">
-              Sin leads pendientes
-            </p>
-            <button
-              onClick={onBack}
-              className="text-[11px] text-[#00ff66] border border-[#00ff6633] px-4 py-2 rounded active:bg-[#00ff6610] transition-colors"
-            >
-              Volver al dashboard
-            </button>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">Todo al dia</p>
+              <p className="text-sm text-muted-foreground mt-1">No quedan leads por revisar</p>
+            </div>
           </motion.div>
         ) : (
           <>
-            {/* Background stack cards */}
             {previewLeads.map((lead, i) => (
               <LeadCard
                 key={lead.id}
@@ -122,20 +101,14 @@ export function SwipeStack({ leads, onLike, onDislike, onBack }: SwipeStackProps
                 stackIndex={i + 1}
               />
             ))}
-
-            {/* Top swipeable card */}
             <AnimatePresence>
               {topLead && (
                 <motion.div
                   key={topLead.id}
                   className="absolute inset-0"
-                  initial={{ scale: 0.95, opacity: 0 }}
+                  initial={{ scale: 0.94, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{
-                    x: 0,
-                    opacity: 0,
-                    transition: { duration: 0.15 },
-                  }}
+                  transition={{ duration: 0.2 }}
                 >
                   <LeadCard
                     lead={topLead}
@@ -150,25 +123,47 @@ export function SwipeStack({ leads, onLike, onDislike, onBack }: SwipeStackProps
         )}
       </div>
 
-      {/* Bottom action buttons */}
+      {/* Action buttons — Tinder style */}
       {remaining.length > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-8 pb-8 pt-4 bg-gradient-to-t from-black via-black/80 to-transparent">
+        <div className="flex justify-center items-center gap-6 pb-4 shrink-0">
           <button
             onClick={() => topLead && handleSwipe('left', topLead.id)}
-            className="w-16 h-16 rounded-full border-2 border-[#ff333355] bg-[#0d0d0d] flex items-center justify-center active:bg-[#ff333318] active:border-[#ff3333] transition-all"
+            className="w-16 h-16 rounded-full bg-white shadow-md border border-border flex items-center justify-center active:scale-95 transition-transform"
             aria-label="Archivar lead"
           >
-            <span className="text-[#ff3333] text-2xl font-light">✕</span>
+            <X size={26} className="text-[var(--nope-color)]" strokeWidth={2.5} />
           </button>
           <button
             onClick={() => topLead && handleSwipe('right', topLead.id)}
-            className="w-16 h-16 rounded-full border-2 border-[#00ff6655] bg-[#0d0d0d] flex items-center justify-center active:bg-[#00ff6618] active:border-[#00ff66] transition-all"
+            className="w-20 h-20 rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+            style={{ background: 'var(--like-color)' }}
             aria-label="Aceptar lead"
           >
-            <span className="text-[#00ff66] text-2xl font-light">✓</span>
+            <Heart size={30} className="fill-white text-white" />
+          </button>
+          <button
+            onClick={() => topLead && handleSwipe('left', topLead.id)}
+            className="w-16 h-16 rounded-full bg-white shadow-md border border-border flex items-center justify-center active:scale-95 transition-transform opacity-0 pointer-events-none"
+            aria-hidden
+          >
+            <X size={26} />
           </button>
         </div>
       )}
     </div>
+  )
+}
+
+function Flame({ size, className }: { size: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M12 2C12 2 9 7 9 10.5C9 12.4 10.3 14 12 14C13.7 14 15 12.4 15 10.5C15 9 14 7.5 14 7.5C14 7.5 17 9.5 17 13C17 16.9 14.8 19.5 12 19.5C9.2 19.5 7 16.9 7 13C7 8.5 12 2 12 2Z" />
+    </svg>
   )
 }

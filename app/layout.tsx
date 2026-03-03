@@ -1,27 +1,27 @@
 import type { Metadata, Viewport } from 'next'
-import { Space_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const spaceMono = Space_Mono({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-space-mono',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-plus-jakarta',
 })
 
 export const metadata: Metadata = {
-  title: 'BASU / OPENCLAW',
-  description: 'Lead intelligence & agent control — Roberto v1',
-  generator: 'openclaw',
+  title: 'Smart Leads',
+  description: 'Gestiona tus leads con inteligencia — swipe, acepta y cierra más.',
+  generator: 'smart-leads',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'OPENCLAW',
+    statusBarStyle: 'default',
+    title: 'Smart Leads',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: '#f7f7f8',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -35,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={spaceMono.variable}>
-      <body className="font-mono antialiased">
+    <html lang="es" className={plusJakarta.variable}>
+      <body className="font-sans antialiased">
         {children}
         <Analytics />
       </body>

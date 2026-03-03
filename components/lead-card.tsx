@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
-import { ChevronUp, Building2, Zap } from 'lucide-react'
+import { ChevronDown, ChevronUp, Building2, Mail } from 'lucide-react'
 import type { Lead } from '@/lib/leads-data'
 
 interface LeadCardProps {
@@ -14,14 +14,45 @@ interface LeadCardProps {
 
 const SWIPE_THRESHOLD = 80
 
+// Deterministic color from lead id for avatar bg
+const AVATAR_COLORS = [
+  ['#fde8ea', '#fd5564'],
+  ['#e8f9f1', '#21c17a'],
+  ['#e8f0fd', '#4a7cfc'],
+  ['#fdf5e8', '#f5a623'],
+  ['#f0e8fd', '#9b59b6'],
+  ['#e8fdfc', '#1abc9c'],
+]
+
+function getAvatarColors(id: string) {
+  const idx = parseInt(id, 10) % AVATAR_COLORS.length
+  return AVATAR_COLORS[idx]
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+}
+
 export function LeadCard({ lead, onSwipe, isTop, stackIndex }: LeadCardProps) {
   const x = useMotionValue(0)
-  const rotate = useTransform(x, [-200, 200], [-20, 20])
-  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1])
-  const dislikeOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0])
-  const cardScale = useTransform(x, [-200, 0, 200], [0.96, 1, 0.96])
+  const rotate = useTransform(x, [-220, 220], [-18, 18])
+  const likeOpacity = useTransform(x, [20, SWIPE_THRESHOLD], [0, 1])
+  const nopeOpacity = useTransform(x, [-SWIPE_THRESHOLD, -20], [1, 0])
   const [isExpanded, setIsExpanded] = useState(false)
-  const contentRef = useRef<HTMLDivElement>(null)
+
+  const [avatarBg, avatarText] = getAvatarColors(lead.id)
+
+  const scoreColor =
+    (lead.score ?? 0) >= 80
+      ? 'var(--score-high)'
+      : (lead.score ?? 0) >= 60
+      ? 'var(--score-mid)'
+      : 'var(--score-low)'
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > SWIPE_THRESHOLD) {
@@ -31,25 +62,13 @@ export function LeadCard({ lead, onSwipe, isTop, stackIndex }: LeadCardProps) {
     }
   }
 
-  const scoreColor =
-    (lead.score ?? 0) >= 80
-      ? '#00ff66'
-      : (lead.score ?? 0) >= 60
-      ? '#ffcc00'
-      : '#888888'
-
-  const stackOffset = stackIndex * 6
-  const stackOpacity = Math.max(0, 1 - stackIndex * 0.25)
-
   if (!isTop) {
     return (
       <div
-        className="absolute inset-0 rounded-lg"
+        className="absolute inset-0 rounded-2xl bg-card shadow-sm border border-border"
         style={{
-          transform: `translateY(${stackOffset}px) scale(${1 - stackIndex * 0.03})`,
-          background: '#0d0d0d',
-          border: '1px solid #222',
-          opacity: stackOpacity,
+          transform: `translateY(${stackIndex * 10}px) scale(${1 - stackIndex * 0.04})`,
+          opacity: Math.max(0, 1 - stackIndex * 0.3),
           zIndex: 10 - stackIndex,
         }}
       />
@@ -58,154 +77,142 @@ export function LeadCard({ lead, onSwipe, isTop, stackIndex }: LeadCardProps) {
 
   return (
     <motion.div
-      className="absolute inset-0 rounded-lg cursor-grab active:cursor-grabbing select-none"
-      style={{
-        x,
-        rotate,
-        scale: cardScale,
-        background: '#0d0d0d',
-        border: '1px solid #222222',
-        zIndex: 20,
-        touchAction: isExpanded ? 'pan-y' : 'none',
-      }}
+      className="absolute inset-0 rounded-2xl bg-card shadow-lg border border-border overflow-hidden cursor-grab active:cursor-grabbing select-none"
+      style={{ x, rotate, zIndex: 20, touchAction: isExpanded ? 'pan-y' : 'none' }}
       drag={!isExpanded ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.7}
+      dragElastic={0.65}
       onDragEnd={handleDragEnd}
-      whileTap={!isExpanded ? { cursor: 'grabbing' } : undefined}
     >
       {/* LIKE stamp */}
       <motion.div
-        className="absolute top-6 left-4 z-30 border-2 border-[#00ff66] rounded px-2 py-1 rotate-[-12deg]"
+        className="absolute top-6 left-5 z-30 border-[3px] border-[var(--like-color)] rounded-xl px-3 py-1 rotate-[-12deg] pointer-events-none"
         style={{ opacity: likeOpacity }}
       >
-        <span className="text-[#00ff66] font-bold text-lg tracking-widest">LIKE</span>
+        <span className="text-[var(--like-color)] font-extrabold text-xl tracking-widest">
+          LIKE
+        </span>
       </motion.div>
 
       {/* NOPE stamp */}
       <motion.div
-        className="absolute top-6 right-4 z-30 border-2 border-[#ff3333] rounded px-2 py-1 rotate-[12deg]"
-        style={{ opacity: dislikeOpacity }}
+        className="absolute top-6 right-5 z-30 border-[3px] border-[var(--nope-color)] rounded-xl px-3 py-1 rotate-[12deg] pointer-events-none"
+        style={{ opacity: nopeOpacity }}
       >
-        <span className="text-[#ff3333] font-bold text-lg tracking-widest">NOPE</span>
+        <span className="text-[var(--nope-color)] font-extrabold text-xl tracking-widest">
+          NOPE
+        </span>
       </motion.div>
 
-      {/* Scrollable content area */}
+      {/* Scrollable inner */}
       <div
-        ref={contentRef}
-        className="h-full overflow-y-auto overscroll-contain"
+        className="h-full flex flex-col overflow-y-auto overscroll-contain"
         style={{ touchAction: isExpanded ? 'pan-y' : 'none' }}
-        onTouchStart={() => isExpanded && undefined}
       >
-        {/* Header */}
-        <div className="p-5 pt-6">
-          {/* Score bar */}
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] text-[#555] tracking-widest uppercase">Score</span>
-            <div className="flex items-center gap-2">
-              <div className="w-24 h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${lead.score ?? 50}%`,
-                    backgroundColor: scoreColor,
-                  }}
-                />
-              </div>
-              <span className="text-xs font-bold" style={{ color: scoreColor }}>
-                {lead.score ?? '—'}
-              </span>
-            </div>
+        {/* Avatar zone — top ~42% of card */}
+        <div
+          className="shrink-0 flex flex-col items-center justify-center gap-3 pt-10 pb-6 px-6"
+          style={{ background: avatarBg, minHeight: '44%' }}
+        >
+          {/* Score pill */}
+          <div
+            className="absolute top-5 right-5 px-2.5 py-1 rounded-full text-xs font-bold text-white"
+            style={{ background: scoreColor }}
+          >
+            {lead.score ?? '—'}
           </div>
 
-          {/* Name & company */}
-          <h2 className="text-xl font-bold text-white leading-tight mb-1">
-            {lead.nombre}
-          </h2>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Building2 size={12} className="text-[#555]" />
-            <span className="text-sm text-[#888]">{lead.empresa}</span>
+          {/* Avatar circle */}
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-extrabold shadow-md"
+            style={{ background: avatarText, color: '#fff' }}
+          >
+            {getInitials(lead.nombre)}
           </div>
-          {lead.cargo && (
-            <span className="text-xs text-[#555]">{lead.cargo}</span>
-          )}
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1.5 mt-4">
-            {lead.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-[10px] px-2 py-0.5 rounded-sm border"
-                style={{
-                  borderColor:
-                    tag.includes('High') || tag.includes('budget')
-                      ? '#00ff6644'
-                      : '#222',
-                  color:
-                    tag.includes('High') || tag.includes('budget')
-                      ? '#00ff66'
-                      : '#666',
-                  background:
-                    tag.includes('High') || tag.includes('budget')
-                      ? '#00ff6608'
-                      : 'transparent',
-                }}
-              >
-                {tag}
-              </span>
-            ))}
+          {/* Name */}
+          <div className="text-center">
+            <h2 className="text-2xl font-extrabold text-foreground leading-tight text-balance">
+              {lead.nombre}
+            </h2>
+            {lead.cargo && (
+              <p className="text-sm font-medium text-secondary-foreground mt-0.5">
+                {lead.cargo}
+              </p>
+            )}
+          </div>
+
+          {/* Company pill */}
+          <div className="flex items-center gap-1.5 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full">
+            <Building2 size={12} className="text-muted-foreground" />
+            <span className="text-xs font-semibold text-foreground">{lead.empresa}</span>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="mx-5 border-t border-[#1a1a1a]" />
+        {/* Tags row */}
+        <div className="px-5 pt-4 flex flex-wrap gap-2">
+          {lead.tags.map((tag) => (
+            <span
+              key={tag}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-border"
+              style={{
+                background:
+                  tag.includes('High') || tag.includes('budget') || tag.includes('intent')
+                    ? '#e8f9f1'
+                    : '#f0f0f3',
+                color:
+                  tag.includes('High') || tag.includes('budget') || tag.includes('intent')
+                    ? 'var(--like-color)'
+                    : 'var(--muted-foreground)',
+                borderColor:
+                  tag.includes('High') || tag.includes('budget') || tag.includes('intent')
+                    ? 'var(--like-color)'
+                    : 'transparent',
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
 
-        {/* Bio expand toggle */}
+        {/* Expand / collapse intel */}
         <button
-          className="w-full flex items-center justify-between px-5 py-3 text-left"
+          className="flex items-center justify-between px-5 py-3 mt-2 text-left w-full"
           onClick={() => setIsExpanded((v) => !v)}
         >
-          <div className="flex items-center gap-2">
-            <Zap size={12} className="text-[#00ff66]" />
-            <span className="text-[11px] text-[#555] tracking-widest uppercase">
-              Intel
-            </span>
-          </div>
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            Informacion del lead
+          </span>
           <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronUp size={16} className="text-[#444]" />
+            <ChevronDown size={16} className="text-muted-foreground" />
           </motion.div>
         </button>
 
-        {/* Bio */}
         <motion.div
           initial={false}
           animate={{ height: isExpanded ? 'auto' : 0 }}
           transition={{ duration: 0.25, ease: 'easeInOut' }}
           style={{ overflow: 'hidden' }}
         >
-          <div className="px-5 pb-5">
-            <p className="text-[13px] text-[#888] leading-relaxed whitespace-pre-line">
+          <div className="px-5 pb-5 space-y-3">
+            <p className="text-sm text-secondary-foreground leading-relaxed">
               {lead.bio_detallada}
             </p>
             {lead.contacto && (
-              <div className="mt-4 pt-3 border-t border-[#1a1a1a]">
-                <span className="text-[10px] text-[#444] tracking-widest uppercase block mb-1">
-                  Contacto
-                </span>
-                <span className="text-[12px] text-[#00ff66]">{lead.contacto}</span>
+              <div className="flex items-center gap-2 bg-secondary rounded-xl px-3 py-2.5">
+                <Mail size={13} className="text-primary shrink-0" />
+                <span className="text-sm font-semibold text-foreground">{lead.contacto}</span>
               </div>
             )}
           </div>
         </motion.div>
 
-        {/* Swipe hint — only show when collapsed */}
+        {/* Swipe hint */}
         {!isExpanded && (
-          <div className="px-5 pb-6 pt-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-[#ff3333]/60 tracking-widest">← NOPE</span>
-              <span className="text-[10px] text-[#333]">desliza</span>
-              <span className="text-[10px] text-[#00ff66]/60 tracking-widest">LIKE →</span>
-            </div>
+          <div className="flex items-center justify-between px-6 pb-5 pt-1 mt-auto">
+            <span className="text-xs font-bold text-[var(--nope-color)]/50">NOPE</span>
+            <span className="text-[10px] text-muted-foreground">desliza</span>
+            <span className="text-xs font-bold text-[var(--like-color)]/50">LIKE</span>
           </div>
         )}
       </div>

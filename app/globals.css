@@ -4,37 +4,41 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: #0d0d0d;
-  --card-foreground: #ffffff;
-  --popover: #0d0d0d;
-  --popover-foreground: #ffffff;
-  --primary: #00ff66;
-  --primary-foreground: #000000;
-  --secondary: #111111;
-  --secondary-foreground: #888888;
-  --muted: #1a1a1a;
-  --muted-foreground: #555555;
-  --accent: #00ff66;
-  --accent-foreground: #000000;
-  --destructive: #ff3333;
+  /* Smart Leads — light Tinder-inspired palette */
+  --background: #f7f7f8;
+  --foreground: #111118;
+  --card: #ffffff;
+  --card-foreground: #111118;
+  --popover: #ffffff;
+  --popover-foreground: #111118;
+  --primary: #fd5564;        /* coral-red — like Tinder */
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0f3;
+  --secondary-foreground: #555566;
+  --muted: #e8e8ed;
+  --muted-foreground: #8888a0;
+  --accent: #21c17a;         /* green — accept signal */
+  --accent-foreground: #ffffff;
+  --destructive: #fd5564;
   --destructive-foreground: #ffffff;
-  --border: #222222;
-  --input: #111111;
-  --ring: #00ff66;
-  --radius: 0.25rem;
+  --border: #e4e4ec;
+  --input: #f0f0f3;
+  --ring: #fd5564;
+  --radius: 1rem;
   /* custom tokens */
-  --terminal-green: #00ff66;
-  --terminal-red: #ff3333;
-  --terminal-dim: #333333;
-  --surface: #0d0d0d;
-  --surface-2: #141414;
+  --like-color: #21c17a;
+  --nope-color: #fd5564;
+  --score-high: #21c17a;
+  --score-mid: #f5a623;
+  --score-low: #aaaabc;
+  --surface: #ffffff;
+  --surface-2: #f7f7f8;
+  --tab-bar-bg: #ffffff;
 }
 
 @theme inline {
-  --font-sans: 'Space Mono', 'Geist Mono', monospace;
-  --font-mono: 'Space Mono', 'Geist Mono', monospace;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Plus Jakarta Sans', sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -54,9 +58,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
 }
 
 @layer base {
@@ -66,15 +71,13 @@
     box-sizing: border-box;
   }
   html {
-    /* prevent overscroll bounce on iOS */
     overscroll-behavior: none;
     height: 100%;
   }
   body {
-    @apply bg-background text-foreground font-mono antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
     height: 100%;
     overflow: hidden;
-    /* respect notches / safe area */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -83,45 +86,14 @@
     height: 100%;
   }
 
-  /* Custom scrollbar – thin, green on black */
   ::-webkit-scrollbar {
     width: 3px;
   }
   ::-webkit-scrollbar-track {
-    background: #000;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #00ff6633;
+    background: #d0d0dc;
     border-radius: 999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #00ff66;
-  }
-
-  /* Terminal cursor blink */
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
-  }
-  .cursor-blink::after {
-    content: '_';
-    color: var(--terminal-green);
-    animation: blink 1s step-end infinite;
-  }
-
-  /* Scanline overlay for the hacker aesthetic */
-  .scanlines::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.08) 2px,
-      rgba(0, 0, 0, 0.08) 4px
-    );
-    pointer-events: none;
-    z-index: 1;
   }
 }
