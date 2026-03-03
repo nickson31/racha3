@@ -1,0 +1,127 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0d0d0d;
+  --card-foreground: #ffffff;
+  --popover: #0d0d0d;
+  --popover-foreground: #ffffff;
+  --primary: #00ff66;
+  --primary-foreground: #000000;
+  --secondary: #111111;
+  --secondary-foreground: #888888;
+  --muted: #1a1a1a;
+  --muted-foreground: #555555;
+  --accent: #00ff66;
+  --accent-foreground: #000000;
+  --destructive: #ff3333;
+  --destructive-foreground: #ffffff;
+  --border: #222222;
+  --input: #111111;
+  --ring: #00ff66;
+  --radius: 0.25rem;
+  /* custom tokens */
+  --terminal-green: #00ff66;
+  --terminal-red: #ff3333;
+  --terminal-dim: #333333;
+  --surface: #0d0d0d;
+  --surface-2: #141414;
+}
+
+@theme inline {
+  --font-sans: 'Space Mono', 'Geist Mono', monospace;
+  --font-mono: 'Space Mono', 'Geist Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+  html {
+    /* prevent overscroll bounce on iOS */
+    overscroll-behavior: none;
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-mono antialiased;
+    height: 100%;
+    overflow: hidden;
+    /* respect notches / safe area */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #__next,
+  main {
+    height: 100%;
+  }
+
+  /* Custom scrollbar – thin, green on black */
+  ::-webkit-scrollbar {
+    width: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #000;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #00ff6633;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00ff66;
+  }
+
+  /* Terminal cursor blink */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+  .cursor-blink::after {
+    content: '_';
+    color: var(--terminal-green);
+    animation: blink 1s step-end infinite;
+  }
+
+  /* Scanline overlay for the hacker aesthetic */
+  .scanlines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.08) 2px,
+      rgba(0, 0, 0, 0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
