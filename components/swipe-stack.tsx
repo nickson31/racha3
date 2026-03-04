@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Inbox } from 'lucide-react'
+import { Inbox, Heart, X } from 'lucide-react'
 import { LeadCard } from '@/components/lead-card'
 import type { Lead } from '@/lib/leads-data'
 
