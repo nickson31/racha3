@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, X, Inbox } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 import { LeadCard } from '@/components/lead-card'
 import type { Lead } from '@/lib/leads-data'
 
@@ -143,26 +143,7 @@ export function SwipeStack({ leads, onLike, onDislike }: SwipeStackProps) {
         )}
       </div>
 
-      {/* Action buttons */}
-      {queue.length > 0 && (
-        <div className="flex justify-center items-center gap-8 pb-3 shrink-0">
-          <button
-            onClick={() => topLead && handleSwipe('left', topLead.id)}
-            className="w-16 h-16 rounded-full bg-white shadow-md border border-border flex items-center justify-center active:scale-90 transition-transform"
-            aria-label="Archivar lead"
-          >
-            <X size={26} className="text-[var(--nope-color)]" strokeWidth={2.5} />
-          </button>
-          <button
-            onClick={() => topLead && handleSwipe('right', topLead.id)}
-            className="w-20 h-20 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform"
-            style={{ background: 'var(--like-color)' }}
-            aria-label="Aceptar lead"
-          >
-            <Heart size={32} className="fill-white text-white" />
-          </button>
-        </div>
-      )}
+
     </div>
   )
 }

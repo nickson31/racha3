@@ -114,9 +114,8 @@ export function LeadCard({ lead, onSwipe, isTop, stackIndex }: LeadCardProps) {
   return (
     <motion.div
       className="absolute inset-0 rounded-3xl bg-card shadow-xl border border-border overflow-hidden select-none"
-      style={{ x, rotate, zIndex: 20 }}
+      style={{ x, rotate, zIndex: 20, touchAction: 'pan-y' }}
       drag="x"
-      dragDirectionLock
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.5}
       onDragStart={handleDragStart}
@@ -146,7 +145,7 @@ export function LeadCard({ lead, onSwipe, isTop, stackIndex }: LeadCardProps) {
       {/* We stop the drag from intercepting vertical touch by using dragDirectionLock above */}
       <div
         className="h-full overflow-y-auto overscroll-contain"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
       >
         {/* ── AVATAR HEADER ── */}
         <div
